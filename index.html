@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karnaugh Tables Maker</title>
+  <title>Karnaugh's Maps Maker</title>
   <link rel="stylesheet" href="./src/css/style.css">
+  <script src="https://kit.fontawesome.com/996d4da3f6.js" crossorigin="anonymous"></script>
+
 </head>
 <body>
   <div class="wrapper">
@@ -14,7 +16,68 @@
       <h2 class="header__text">// Made By Bl4ky113</h2>
     </header>
     <main class="content">
-      
+      <section class="section section--kgh">
+        <div class="section-content">
+          <h3 class="title">Create Karnaugh's Map</h3>
+          <label class="label" for="input_formula">
+            First Enter the Formula for the Karnaugh's Map: 
+          </label>
+          <input class="input" type="text" id="input_formula">
+          <label class="label" for="input_num-variables">
+            Enter the number of variables in the Formula (Max 4, Min 2):
+          </label>
+          <input class="input" type="number" id="input_num-variables" max="4" min="2">
+          <label for="input_start" class="label">
+            Now, lets Make that Table:
+          </label>
+          <input class="input" type="button" value="Create The Table" id="input_start">
+        </div>
+        <div class="section-kghtb">
+          <div class="table-wrapper">
+            <table class="table">
+              <thead class="theader">
+                <tr>
+                  <th class="theader__variables">AB|CD</th>
+                  <th class="theader__value">00</th>
+                  <th class="theader__value">01</th>
+                  <th class="theader__value">11</th>
+                  <th class="theader__value">10</th>
+                </tr>
+              </thead>
+              <tbody class="tbody">
+                <tr>
+                  <th class="tbody__value">00</th>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                </tr>
+                <tr>
+                  <th class="tbody__value">01</th>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                </tr>
+                <tr>
+                  <th class="tbody__value">11</th>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                </tr>
+                <tr>
+                  <th class="tbody__value">10</th>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                  <td class="tbody__result">...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
     <footer class="footer">
 
