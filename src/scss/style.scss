@@ -4,6 +4,8 @@
   --color_base: #a70a0a;
   --color_dark: #690606;
   --color_light: #f11818;
+
+  --black: #000;
 }
 
 body { font-size: 16px; }
@@ -36,7 +38,7 @@ body { font-size: 16px; }
 
   .header__title {
     color: white;
-    font: 500 2.5rem sans-serif;
+    font: 800 2.5rem sans-serif;
   }
 
   .header__text {
@@ -59,4 +61,82 @@ body { font-size: 16px; }
   padding: 0.5rem;
 
   grid-area: content;
+
+  .section {
+
+    .title {
+      max-width: 100%;
+
+      margin: 0.5rem auto;
+      border-left: 0.25rem solid var(--color_base);
+      border-bottom: 0.25rem solid var(--color_base);
+      padding: 0.25rem 0.25rem;
+
+      color: var(--color_base);
+      font: 800 1.5rem sans-serif;  
+      text-align: center;
+    }   
+
+    .text {
+      margin: 0.5rem;
+
+      color: var(--black);
+      font: 400 1rem sans-serif;
+    }
+
+    .label {
+      margin: 0.5rem 1rem;
+
+      color: var(--black);
+      font: 400 1rem sans-serif;
+      
+      display: block;
+    }
+
+    .input {
+      min-width: 60%;
+
+      margin: 0.5rem 1rem;
+      border: 0.1rem solid var(--color_base);
+      padding: 0.25rem 0.5rem;
+
+      display: block;
+
+      color: var(--black);
+      font: 400 1.25rem sans-serif;
+
+      &:focus,
+      &:hover {
+        outline: 0.11rem solid var(--color_base);
+      }
+    }
+
+    .input[type="button"] {
+      background-color: white;
+
+      &:focus,
+      &:hover {
+        background-color: var(--color_dark);
+
+        color: white;
+        text-decoration: underline solid white;
+
+      }
+    }
+  }
+
+  .section--kgh {
+    display: grid;
+
+    grid-template: 1fr / 45% 1fr;
+    grid-template-areas: "content karnaughTable";
+
+    .section-content {
+      grid-area: content;
+    }
+    
+    .section-kghtb {
+      grid-area: karnaughTable;
+    }
+  }
 }
