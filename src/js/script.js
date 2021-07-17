@@ -19,5 +19,5 @@ input.formula.onchange = (event) => {
 }
 
 function getVariables (obj_val) {
-  let val_arr = ;
+  
 }

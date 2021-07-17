@@ -17,6 +17,4 @@ input.formula.onchange = function (event) {
   getVariables(val);
 };
 
-function getVariables(obj_val) {
-  var val_arr = [ojb_val];
-}
+function getVariables(obj_val) {}
