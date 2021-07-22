@@ -10,17 +10,38 @@ var input = {
   startBtn: get.id("input_start")
 };
 var operators = ["+", "*", "-", "(", ")"];
+var formula_info = {
+  raw: "",
+  operation: "",
+  text: ""
+};
 
-function getVariables(obj_val) {
+function isNumber(_char) {
+  if (isNaN(parseInt(_char))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function isInArray(array, _char2) {
+  if (array.indexOf(_char2) >= 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getVariables(raw_formula) {
   var varNum = 0;
   var formulaVar = [];
-  obj_val = obj_val.split("");
+  raw_formula = raw_formula.split("");
 
-  for (var i = 0; i <= obj_val.length; i += 1) {
-    if (typeof obj_val[i] === "string") {
-      if (!(operators.indexOf(obj_val[i]) >= 0)) {
-        // Skip if is an operator
-        formulaVar.push(obj_val[i]);
+  for (var i = 0; i <= raw_formula.length; i += 1) {
+    if (typeof raw_formula[i] === "string" && !isNumber(raw_formula[i])) {
+      // Skip if is an operator Or if it is already a variable
+      if (!isInArray(operators, raw_formula[i]) && !isInArray(formulaVar, raw_formula[i])) {
+        formulaVar.push(raw_formula[i]);
         varNum += 1;
       }
     }
@@ -29,10 +50,25 @@ function getVariables(obj_val) {
   return [varNum, formulaVar];
 }
 
-input.formula.oninput = function (event) {};
+function changeFormula(raw_formula) {
+  raw_formulaArr = raw_fromula.split("");
+}
 
-input.formula.onchange = function (event) {
-  var obj = event.target;
-  var val = obj.value;
-  var varInfo = getVariables(val);
+input.formula.oninput = function (event) {
+  formula_info.raw = input.formula.value;
+  formula_info.operation = input.formula.value;
+  var formula_rawArr = formula_info.raw.split("");
+
+  for (var i = 0; i < formula_rawArr.length; i += 1) {
+    if (!isNumber(formula_rawArr[i])) {
+      formula_info["var"] = {
+        num: getVariables(formula_info.raw)[0],
+        var_char: getVariables(formula_info.raw)[1]
+      };
+      console.log(formula_info);
+    } else {
+      alert("Intenta no Escribir números en la Formula");
+    }
+  }
 };
+/* Matrices Inversas para solucionar la formula */
