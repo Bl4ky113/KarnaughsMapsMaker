@@ -82,6 +82,7 @@ body {
   display: block;
   color: var(--black);
   font: 400 1.25rem sans-serif;
+  text-transform: capitalize;
 }
 .content .section .input:focus, .content .section .input:hover {
   outline: 0.11rem solid var(--color_base);
@@ -102,21 +103,20 @@ body {
 .content .section--kgh .section-content {
   grid-area: content;
 }
-.content .section--kgh .section-kghtb {
+.content .section--kgh .table-wrapper {
   margin: 0.25rem;
   border-radius: 0.25rem;
   padding: 0.25rem;
   background-color: var(--color_base);
   grid-area: karnaughTable;
 }
-.content .section--kgh .section-kghtb .table {
+.content .section--kgh .table-wrapper .table {
   width: 100%;
   height: 100%;
   background-color: white;
   display: grid;
-  grid-template: 15% repeat(4, 1fr)/15% repeat(4, 1fr);
 }
-.content .section--kgh .section-kghtb .table .variables {
+.content .section--kgh .table-wrapper .table .variables {
   grid-column: 1/2;
   grid-row: 1/2;
   padding: 0.5rem;
@@ -128,11 +128,11 @@ body {
   align-items: center;
   justify-content: space-around;
 }
-.content .section--kgh .section-kghtb .table .variables .separator {
+.content .section--kgh .table-wrapper .table .variables .separator {
   height: 100%;
   border-left: 0.15rem solid white;
 }
-.content .section--kgh .section-kghtb .table .value {
+.content .section--kgh .table-wrapper .table .value {
   border-right: 0.1rem solid var(--color_dark);
   border-bottom: 0.1rem solid var(--color_dark);
   background-color: var(--color_base);
@@ -143,11 +143,20 @@ body {
   align-items: center;
   justify-content: center;
 }
-.content .section--kgh .section-kghtb .table .result {
+.content .section--kgh .table-wrapper .table .result {
   border-right: 0.1rem solid var(--color_dark);
   border-bottom: 0.1rem solid var(--color_dark);
   padding-right: 25%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+.content .section--kgh .table-wrapper .table--var2 {
+  grid-template: 15% repeat(2, 1fr)/15% repeat(2, 1fr);
+}
+.content .section--kgh .table-wrapper .table--var3 {
+  grid-template: 15% repeat(2, 1fr)/15% repeat(4, 1fr);
+}
+.content .section--kgh .table-wrapper .table--var4 {
+  grid-template: 15% repeat(4, 1fr)/15% repeat(4, 1fr);
 }
