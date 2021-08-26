@@ -53,20 +53,30 @@ function isInArray (array, char) {
 }
 
 function getVariables (raw_formula) {
-  var varNum = 0;
-  var formulaVar = [];
+  let varNum = 0;
+  let resVar = [0, 0];
+  let formulaVar = [];
 
   raw_formula = raw_formula.split("");
-  for (let i = 0; i <= raw_formula.length; i += 1) {
+  for (let i = 0; i < raw_formula.length; i += 1) {
     if (typeof raw_formula[i] === "string" && !(isNumber(raw_formula[i]))) {
       // Skip if is an operator Or if it is already a variable
       if ( !(isInArray(operators, raw_formula[i])) && !(isInArray(formulaVar, raw_formula[i])) ) { 
         formulaVar.push(raw_formula[i]);
         varNum += 1;
       }
+    } else {
+      alert("Intenta Ingresar solo Variables y sus Operadores Lógicos");
+      break;
     }
   }
-  return [varNum, formulaVar];
+
+  for (let i = 0; i < formulaVar.length; i += 1) {
+    if ((i + 1) % 2 == 0) resVar[0] += 2;
+    else resVar[1] += 2;
+  }
+
+  return [varNum, resVar, formulaVar];
 }
 
 // Change the content of the input in the Formula
@@ -140,10 +150,10 @@ function changeTableLayout (num_var, varArr) {
   }
 }
 
-function getBinFormulaValues (num_variables) {
+function getBinFormulaValues (num_variables, arr_results_num) {
   let binValues = [];
   let dec_num = 0;
-  for (let i = 0; i < num_variables ** 2; i += 1) {
+  for (let i = 0; i < (arr_results_num[0] * arr_results_num[1]); i += 1) {
     dec_num = i;
     let str_num = (dec_num).toString(2);
     let arr_num = str_num.split("");
@@ -155,9 +165,20 @@ function getBinFormulaValues (num_variables) {
   return binValues;
 }
 
-function calcFormula (operation, variables, num_variables) { 
+function calcFormula (operation, variables, num_variables, arr_results_num) { 
   // Change the Formula to a Logial or operational formula
-  let binValues = getBinFormulaValues(num_variables);
+  let binValues = getBinFormulaValues(num_variables, arr_results_num);
+
+  for (let i = 0; i < (arr_results_num[0] * arr_results_num[1]); i += 1) {
+    let logical_operation = [...operation];
+    for (let e = 0; e < logical_operation.length; e += 1) {
+      if (isInArray(variables, operation[e])) {
+        let index_logical_value = variables.indexOf(logical_operation[e]);
+        logical_operation[e] = binValues[i][index_logical_value];
+      }
+    }
+    console.log(logical_operation);
+  }
 
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
   // let values_formulas = [];
@@ -212,22 +233,17 @@ input.formula.oninput = (event) => {
 
   // Check if there's any number in the Formula, which is bad btw
   let formula_rawArr = formula_info.raw.split("");
-  for ( let i = 0; i < formula_rawArr.length; i += 1 ) {
-    if ( !( isNumber(formula_rawArr[i]) ) ) {
-      let variables =  getVariables(formula_info.raw);
-      formula_info.var = {
-        num: variables[0],
-        var_char: variables[1]
-      };
-    } else {
-      alert("Intenta no Escribir números en la Formula");
-    }
-  }
+  let variables =  getVariables(formula_info.raw);
+  formula_info.var = {
+    num_var: variables[0],
+    arr_num_res: variables[1],
+    arr_var: variables[2]
+  };
 }
 
 input.startBtn.onclick = (event) => {
-  calcFormula(formula_info.operation, formula_info.var.var_char, formula_info.var.num);
-  changeTableLayout(formula_info.var.num, formula_info.var.var_char);
+  calcFormula(formula_info.operation, formula_info.var.arr_var, formula_info.var.num_var, formula_info.var.arr_num_res);
+  changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var);
 }
 
 /* Matrices Inversas para solucionar la formula */

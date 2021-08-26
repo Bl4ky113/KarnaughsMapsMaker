@@ -47,20 +47,28 @@ function isInArray(array, _char2) {
 
 function getVariables(raw_formula) {
   var varNum = 0;
+  var resVar = [0, 0];
   var formulaVar = [];
   raw_formula = raw_formula.split("");
 
-  for (var i = 0; i <= raw_formula.length; i += 1) {
+  for (var i = 0; i < raw_formula.length; i += 1) {
     if (typeof raw_formula[i] === "string" && !isNumber(raw_formula[i])) {
       // Skip if is an operator Or if it is already a variable
       if (!isInArray(operators, raw_formula[i]) && !isInArray(formulaVar, raw_formula[i])) {
         formulaVar.push(raw_formula[i]);
         varNum += 1;
       }
+    } else {
+      alert("Intenta Ingresar solo Variables y sus Operadores Lógicos");
+      break;
     }
   }
 
-  return [varNum, formulaVar];
+  for (var _i = 0; _i < formulaVar.length; _i += 1) {
+    if ((_i + 1) % 2 == 0) resVar[0] += 2;else resVar[1] += 2;
+  }
+
+  return [varNum, resVar, formulaVar];
 } // Change the content of the input in the Formula
 
 
@@ -80,11 +88,11 @@ function changeTableLayout(num_var, varArr) {
   var value_div_row = [];
   var value_div_col = [];
 
-  for (var _i = 0; 4 > _i; _i += 1) {
+  for (var _i2 = 0; 4 > _i2; _i2 += 1) {
     value_div_row.push(document.createElement("div"));
-    value_div_row[_i].className = "value";
-    value_div_row[_i].innerHTML = value_var[_i];
-    value_div_col[_i] = value_div_row[_i].cloneNode(true);
+    value_div_row[_i2].className = "value";
+    value_div_row[_i2].innerHTML = value_var[_i2];
+    value_div_col[_i2] = value_div_row[_i2].cloneNode(true);
   }
 
   var separator = "<div class=\"separator\"></div>";
@@ -107,20 +115,20 @@ function changeTableLayout(num_var, varArr) {
 
   output.table.appendChild(variables_div);
 
-  for (var _i2 = 0; rowNum > _i2; _i2 += 1) {
+  for (var _i3 = 0; rowNum > _i3; _i3 += 1) {
     if (rowNum == 2) {
-      value_div_row[_i2].innerHTML = value_div_row[_i2].innerHTML.substring(1);
+      value_div_row[_i3].innerHTML = value_div_row[_i3].innerHTML.substring(1);
     }
 
-    output.table.appendChild(value_div_row[_i2]);
+    output.table.appendChild(value_div_row[_i3]);
   }
 
-  for (var _i3 = 0; colNum > _i3; _i3 += 1) {
+  for (var _i4 = 0; colNum > _i4; _i4 += 1) {
     if (colNum == 2) {
-      value_div_col[_i3].innerHTML = value_div_col[_i3].innerHTML.substring(1);
+      value_div_col[_i4].innerHTML = value_div_col[_i4].innerHTML.substring(1);
     }
 
-    output.table.appendChild(value_div_col[_i3]);
+    output.table.appendChild(value_div_col[_i4]);
 
     for (var e = 0; rowNum > e; e += 1) {
       var result_div = document.createElement("div");
@@ -131,11 +139,11 @@ function changeTableLayout(num_var, varArr) {
   }
 }
 
-function getBinFormulaValues(num_variables) {
+function getBinFormulaValues(num_variables, arr_results_num) {
   var binValues = [];
   var dec_num = 0;
 
-  for (var i = 0; i < Math.pow(num_variables, 2); i += 1) {
+  for (var i = 0; i < arr_results_num[0] * arr_results_num[1]; i += 1) {
     dec_num = i;
     var str_num = dec_num.toString(2);
     var arr_num = str_num.split("");
@@ -150,9 +158,22 @@ function getBinFormulaValues(num_variables) {
   return binValues;
 }
 
-function calcFormula(operation, variables, num_variables) {
+function calcFormula(operation, variables, num_variables, arr_results_num) {
   // Change the Formula to a Logial or operational formula
-  var binValues = getBinFormulaValues(num_variables);
+  var binValues = getBinFormulaValues(num_variables, arr_results_num);
+
+  for (var i = 0; i < arr_results_num[0] * arr_results_num[1]; i += 1) {
+    var logical_operation = _toConsumableArray(operation);
+
+    for (var e = 0; e < logical_operation.length; e += 1) {
+      if (isInArray(variables, operation[e])) {
+        var index_logical_value = variables.indexOf(logical_operation[e]);
+        logical_operation[e] = binValues[i][index_logical_value];
+      }
+    }
+
+    console.log(logical_operation);
+  }
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
   // let values_formulas = [];
   // var values_variables = [];
@@ -191,6 +212,7 @@ function calcFormula(operation, variables, num_variables) {
   //   values_formulas.push(values_variables);
   //   console.log(values_formulas);
   // }
+
 }
 
 input.formula.oninput = function (event) {
@@ -198,22 +220,16 @@ input.formula.oninput = function (event) {
   formula_info.operation = formula_info.raw.split(""); // Check if there's any number in the Formula, which is bad btw
 
   var formula_rawArr = formula_info.raw.split("");
-
-  for (var i = 0; i < formula_rawArr.length; i += 1) {
-    if (!isNumber(formula_rawArr[i])) {
-      var variables = getVariables(formula_info.raw);
-      formula_info["var"] = {
-        num: variables[0],
-        var_char: variables[1]
-      };
-    } else {
-      alert("Intenta no Escribir números en la Formula");
-    }
-  }
+  var variables = getVariables(formula_info.raw);
+  formula_info["var"] = {
+    num_var: variables[0],
+    arr_num_res: variables[1],
+    arr_var: variables[2]
+  };
 };
 
 input.startBtn.onclick = function (event) {
-  calcFormula(formula_info.operation, formula_info["var"].var_char, formula_info["var"].num);
-  changeTableLayout(formula_info["var"].num, formula_info["var"].var_char);
+  calcFormula(formula_info.operation, formula_info["var"].arr_var, formula_info["var"].num_var, formula_info["var"].arr_num_res);
+  changeTableLayout(formula_info["var"].num_var, formula_info["var"].arr_var);
 };
 /* Matrices Inversas para solucionar la formula */
