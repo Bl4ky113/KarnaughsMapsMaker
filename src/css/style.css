@@ -72,6 +72,7 @@ body {
   margin: 0.5rem 1rem;
   color: var(--black);
   font: 400 1rem "Lato", sans-serif;
+  text-decoration: underline solid var(--color_base);
   display: block;
 }
 .content .section .input {
@@ -161,4 +162,4 @@ body {
 }
 .content .section--kgh .table-wrapper .table--var4 {
   grid-template: 15% repeat(4, 1fr)/15% repeat(4, 1fr);
-}}
+}

@@ -32,7 +32,8 @@ const value_var = [
 var formula_info = {
   raw: "",
   operation: "",
-  text: ""
+  text: "",
+  results: {},
 };
 
 function isNumber (char) {
@@ -139,17 +140,85 @@ function changeTableLayout (num_var, varArr) {
   }
 }
 
-input.formula.oninput = (event) => {
-  formula_info.raw = input.formula.value;
-  formula_info.operation = formula_info.raw;
+function getBinFormulaValues (num_variables) {
+  let binValues = [];
+  let dec_num = 0;
+  for (let i = 0; i < num_variables ** 2; i += 1) {
+    dec_num = i;
+    let str_num = (dec_num).toString(2);
+    let arr_num = str_num.split("");
 
+    while (arr_num.length !== num_variables) { arr_num = ["0", ...arr_num]; }
+
+    binValues.push(arr_num);
+  }
+  return binValues;
+}
+
+function calcFormula (operation, variables, num_variables) { 
+  // Change the Formula to a Logial or operational formula
+  let binValues = getBinFormulaValues(num_variables);
+
+  /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
+  // let values_formulas = [];
+  // var values_variables = [];
+  
+  // for (let e = 0; e < num_variables ** 2; e += 1) {
+  //   if (values_formulas.length >= 1) {
+  //     let while_conditional = true;
+
+  //     while (while_conditional) {
+  //       values_variables = [];
+  //       for (let i = 0; i < num_variables; i += 1) {
+  //         let num = Math.floor(Math.random() * 2);
+  //         if (num === 1) values_variables.push(1);
+  //         else values_variables.push(0);
+  //       }
+        
+  //       let true_values = []
+  //       let equal_values = []
+
+  //       for (let i = 0; i < values_formulas.length; i += 1) {
+  //         true_values = []
+  //         equal_values = []
+  //         for (let o = 0; o < values_formulas[i].length && o < values_variables.length; o += 1) {
+  //           true_values.push(true);
+  //           if (values_formulas[i][o] == values_variables[o]) equal_values.push(true);
+  //           else equal_values.push(false);
+  //         }
+  //       }
+
+  //       if (!equal_values.every(t => true_values.includes(t))) {
+  //         console.log("HELL YES"); 
+  //         while_conditional = false;
+  //       }
+  //     }
+  //   } else { for (let i = 0; i < num_variables; i += 1) values_variables.push(0); }
+    
+  //   // for (let i = 0; i < operation.length; i += 1) {
+  //   //   if (isInArray(variables, operation[i])) {
+  //   //     operation[i] = values_variables[i];
+  //   //   }
+  //   // }
+  
+  //   values_formulas.push(values_variables);
+  //   console.log(values_formulas);
+  // }
+}
+
+input.formula.oninput = (event) => {
+  formula_info.raw = input.formula.value.toUpperCase();
+  formula_info.operation = formula_info.raw.split("");
+
+  // Check if there's any number in the Formula, which is bad btw
   let formula_rawArr = formula_info.raw.split("");
   for ( let i = 0; i < formula_rawArr.length; i += 1 ) {
     if ( !( isNumber(formula_rawArr[i]) ) ) {
+      let variables =  getVariables(formula_info.raw);
       formula_info.var = {
-        num: getVariables(formula_info.raw)[0],
-        var_char: getVariables(formula_info.raw)[1],
-      }
+        num: variables[0],
+        var_char: variables[1]
+      };
     } else {
       alert("Intenta no Escribir números en la Formula");
     }
@@ -157,6 +226,7 @@ input.formula.oninput = (event) => {
 }
 
 input.startBtn.onclick = (event) => {
+  calcFormula(formula_info.operation, formula_info.var.var_char, formula_info.var.num);
   changeTableLayout(formula_info.var.num, formula_info.var.var_char);
 }
 

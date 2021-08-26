@@ -1,5 +1,13 @@
 "use strict";
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 // Made By Bl4ky113
 var get = {
   id: document.getElementById.bind(document),
@@ -17,7 +25,8 @@ var value_var = ["00", "01", "10", "11"];
 var formula_info = {
   raw: "",
   operation: "",
-  text: ""
+  text: "",
+  results: {}
 };
 
 function isNumber(_char) {
@@ -122,16 +131,80 @@ function changeTableLayout(num_var, varArr) {
   }
 }
 
+function getBinFormulaValues(num_variables) {
+  var binValues = [];
+  var dec_num = 0;
+
+  for (var i = 0; i < Math.pow(num_variables, 2); i += 1) {
+    dec_num = i;
+    var str_num = dec_num.toString(2);
+    var arr_num = str_num.split("");
+
+    while (arr_num.length !== num_variables) {
+      arr_num = ["0"].concat(_toConsumableArray(arr_num));
+    }
+
+    binValues.push(arr_num);
+  }
+
+  return binValues;
+}
+
+function calcFormula(operation, variables, num_variables) {
+  // Change the Formula to a Logial or operational formula
+  var binValues = getBinFormulaValues(num_variables);
+  /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
+  // let values_formulas = [];
+  // var values_variables = [];
+  // for (let e = 0; e < num_variables ** 2; e += 1) {
+  //   if (values_formulas.length >= 1) {
+  //     let while_conditional = true;
+  //     while (while_conditional) {
+  //       values_variables = [];
+  //       for (let i = 0; i < num_variables; i += 1) {
+  //         let num = Math.floor(Math.random() * 2);
+  //         if (num === 1) values_variables.push(1);
+  //         else values_variables.push(0);
+  //       }
+  //       let true_values = []
+  //       let equal_values = []
+  //       for (let i = 0; i < values_formulas.length; i += 1) {
+  //         true_values = []
+  //         equal_values = []
+  //         for (let o = 0; o < values_formulas[i].length && o < values_variables.length; o += 1) {
+  //           true_values.push(true);
+  //           if (values_formulas[i][o] == values_variables[o]) equal_values.push(true);
+  //           else equal_values.push(false);
+  //         }
+  //       }
+  //       if (!equal_values.every(t => true_values.includes(t))) {
+  //         console.log("HELL YES"); 
+  //         while_conditional = false;
+  //       }
+  //     }
+  //   } else { for (let i = 0; i < num_variables; i += 1) values_variables.push(0); }
+  //   // for (let i = 0; i < operation.length; i += 1) {
+  //   //   if (isInArray(variables, operation[i])) {
+  //   //     operation[i] = values_variables[i];
+  //   //   }
+  //   // }
+  //   values_formulas.push(values_variables);
+  //   console.log(values_formulas);
+  // }
+}
+
 input.formula.oninput = function (event) {
-  formula_info.raw = input.formula.value;
-  formula_info.operation = formula_info.raw;
+  formula_info.raw = input.formula.value.toUpperCase();
+  formula_info.operation = formula_info.raw.split(""); // Check if there's any number in the Formula, which is bad btw
+
   var formula_rawArr = formula_info.raw.split("");
 
   for (var i = 0; i < formula_rawArr.length; i += 1) {
     if (!isNumber(formula_rawArr[i])) {
+      var variables = getVariables(formula_info.raw);
       formula_info["var"] = {
-        num: getVariables(formula_info.raw)[0],
-        var_char: getVariables(formula_info.raw)[1]
+        num: variables[0],
+        var_char: variables[1]
       };
     } else {
       alert("Intenta no Escribir números en la Formula");
@@ -140,6 +213,7 @@ input.formula.oninput = function (event) {
 };
 
 input.startBtn.onclick = function (event) {
+  calcFormula(formula_info.operation, formula_info["var"].var_char, formula_info["var"].num);
   changeTableLayout(formula_info["var"].num, formula_info["var"].var_char);
 };
 /* Matrices Inversas para solucionar la formula */
