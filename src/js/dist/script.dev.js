@@ -77,7 +77,7 @@ function changeFormula(raw_formula) {
   raw_formulaArr = raw_fromula.split("");
 }
 
-function changeTableLayout(num_var, varArr) {
+function changeTableLayout(num_var, var_arr, num_results, result_arr) {
   // Delete every single Obj within the table
   for (var i = 1; output.table.childNodes.length >= 1; i += 1) {
     output.table.removeChild(output.table.childNodes[0]);
@@ -101,15 +101,15 @@ function changeTableLayout(num_var, varArr) {
   variables_div.className = "variables";
 
   if (num_var === 2) {
-    variables_div.innerHTML = "".concat(varArr[0], " ").concat(separator, " ").concat(varArr[1]);
+    variables_div.innerHTML = "".concat(var_arr[0], " ").concat(separator, " ").concat(var_arr[1]);
     rowNum = 2;
     colNum = 2;
   } else if (num_var === 3) {
-    variables_div.innerHTML = "".concat(varArr[0], " ").concat(separator, " ").concat(varArr[1]).concat(varArr[2]);
+    variables_div.innerHTML = "".concat(var_arr[0], " ").concat(separator, " ").concat(var_arr[1]).concat(var_arr[2]);
     rowNum = 4;
     colNum = 2;
   } else if (num_var === 4) {
-    variables_div.innerHTML = "".concat(varArr[0]).concat(varArr[1], " ").concat(separator, " ").concat(varArr[2]).concat(varArr[3]);
+    variables_div.innerHTML = "".concat(var_arr[0]).concat(var_arr[1], " ").concat(separator, " ").concat(var_arr[2]).concat(var_arr[3]);
     rowNum = 4;
     colNum = 4;
   }
@@ -248,6 +248,8 @@ function calcGate(logical_operation, logical_gate_function, logical_operator_ind
 function calcFormula(operation, variables, num_variables, arr_results_num) {
   // Change the Formula to a Logial or operational formula
   var binValues = getBinFormulaValues(num_variables, arr_results_num);
+  var results_arr = [];
+  var results_obj = {};
 
   for (var i = 0; i < arr_results_num[0] * arr_results_num[1]; i += 1) {
     var logical_operation = _toConsumableArray(operation);
@@ -278,12 +280,28 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
       logical_operation = _toConsumableArray(logical_or_output);
     }
 
-    if (logical_operation.length > 1) {
+    if (logical_operation.length > 1 && formula_info.ready_to_go === true) {
       alert("Debes ingresar una Formula con Operadores Lógicos Validos");
       formula_info.ready_to_go = false;
       break;
+    } else {
+      logical_operation = logical_operation.join();
+      results_arr.push(logical_operation);
     }
+  } // Return the results from the operation in order (row_i: col_1 col_2... col_i) 
+
+
+  for (var _i5 = 0; _i5 <= arr_results_num[0]; _i5 += arr_results_num[0]) {
+    var results_columns = [];
+
+    for (var _e = 0; _e < arr_results_num[1]; _e += 1) {
+      results_columns.push(results_arr[_e + _i5]);
+    }
+
+    results_obj["row".concat(_i5)] = [].concat(results_columns);
   }
+
+  return results_obj;
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
   // let values_formulas = [];
   // var values_variables = [];
@@ -322,7 +340,6 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
   //   values_formulas.push(values_variables);
   //   console.log(values_formulas);
   // }
-
 }
 
 input.formula.oninput = function (event) {
@@ -352,7 +369,7 @@ input.startBtn.onclick = function (event) {
   formula_info.results = calcFormula(formula_info.operation, formula_info["var"].arr_var, formula_info["var"].num_var, formula_info["var"].arr_num_res);
 
   if (formula_info.ready_to_go === true) {
-    changeTableLayout(formula_info["var"].num_var, formula_info["var"].arr_var);
+    changeTableLayout(formula_info["var"].num_var, formula_info["var"].arr_var, formula_info["var"].arr_num_res, formula_info.results);
   }
 };
 /* Matrices Inversas para solucionar la formula */

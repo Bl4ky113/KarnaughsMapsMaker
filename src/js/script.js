@@ -85,7 +85,7 @@ function changeFormula (raw_formula) {
   raw_formulaArr = raw_fromula.split("");
 }
 
-function changeTableLayout (num_var, varArr) {
+function changeTableLayout (num_var, var_arr, num_results, result_arr) {
   // Delete every single Obj within the table
   for (let i = 1; output.table.childNodes.length >= 1; i += 1) {
     output.table.removeChild(output.table.childNodes[0]);
@@ -112,17 +112,17 @@ function changeTableLayout (num_var, varArr) {
   variables_div.className = "variables";
 
   if (num_var === 2) {
-    variables_div.innerHTML = `${varArr[0]} ${separator} ${varArr[1]}`
+    variables_div.innerHTML = `${var_arr[0]} ${separator} ${var_arr[1]}`
 
     rowNum = 2;
     colNum = 2;
   } else if (num_var === 3) {
-    variables_div.innerHTML = `${varArr[0]} ${separator} ${varArr[1]}${varArr[2]}`
+    variables_div.innerHTML = `${var_arr[0]} ${separator} ${var_arr[1]}${var_arr[2]}`
 
     rowNum = 4;
     colNum = 2;
   } else if (num_var === 4) {
-    variables_div.innerHTML = `${varArr[0]}${varArr[1]} ${separator} ${varArr[2]}${varArr[3]}`
+    variables_div.innerHTML = `${var_arr[0]}${var_arr[1]} ${separator} ${var_arr[2]}${var_arr[3]}`
 
     rowNum = 4;
     colNum = 4;
@@ -243,6 +243,8 @@ function calcGate (logical_operation, logical_gate_function, logical_operator_in
 function calcFormula (operation, variables, num_variables, arr_results_num) { 
   // Change the Formula to a Logial or operational formula
   let binValues = getBinFormulaValues(num_variables, arr_results_num);
+  let results_arr = [];
+  let results_obj = {};
 
   for (let i = 0; i < (arr_results_num[0] * arr_results_num[1]); i += 1) {
     let logical_operation = [...operation];
@@ -263,14 +265,28 @@ function calcFormula (operation, variables, num_variables, arr_results_num) {
     let logical_or_output = calcGate(logical_operation, gate.or, 0);
     if (logical_or_output != logical_operation) { logical_operation = [...logical_or_output]; }
     
-    if (logical_operation.length > 1) {
+    if (logical_operation.length > 1 && formula_info.ready_to_go === true) {
       alert("Debes ingresar una Formula con Operadores Lógicos Validos");
       formula_info.ready_to_go = false;
       break;
+    } else {
+      logical_operation = logical_operation.join();
+      results_arr.push(logical_operation);
     }
   }
 
+  // Return the results from the operation in order (row_i: col_1 col_2... col_i) 
+
+  for (let i = 0; i <= arr_results_num[0]; i += arr_results_num[0]) {
+    let results_columns = [];
+    for (let e = 0; e < arr_results_num[1]; e += 1) results_columns.push(results_arr[e + i]);
+    results_obj[`row${i}`] = [...results_columns];
+  }
+
+  return results_obj;
+  
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
+  
   // let values_formulas = [];
   // var values_variables = [];
   
@@ -343,9 +359,9 @@ input.startBtn.onclick = (event) => {
   }
 
   formula_info.results = calcFormula(formula_info.operation, formula_info.var.arr_var, formula_info.var.num_var, formula_info.var.arr_num_res);
-  
+
   if (formula_info.ready_to_go === true) {
-    changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var);
+    changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var, formula_info.var.arr_num_res, formula_info.results);
   }
 }
 
