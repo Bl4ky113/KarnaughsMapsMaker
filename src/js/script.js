@@ -165,6 +165,51 @@ function getBinFormulaValues (num_variables, arr_results_num) {
   return binValues;
 }
 
+function checkForGates (index_gate, logical_operation) {
+  let info_obj = {
+    thereIsGates: false,
+    numGates: 0,
+    index_gates: []
+  };
+  let operation = [...logical_operation];
+
+  operation.forEach(element => { if (element === operators[index_gate]) { 
+    info_obj.thereIsGates = true; 
+    info_obj.numGates += 1;
+    info_obj.index_gates.push(operation.indexOf(element));
+    operation[operation.indexOf(element)] = null;
+  }});
+  return info_obj;
+}
+
+function calcOrGate (logical_operation) {
+  const gate_info = checkForGates(0, logical_operation),
+        increment_correction_index = 2;
+  var result_operation = [...logical_operation],
+      correction_index = 1;
+  
+  if (gate_info.thereIsGates === true) {
+    let current_operation = [];
+
+    // Get Every single individual operation in the formula
+    for (let i = 0; i < gate_info.numGates; i += 1) {
+      current_operation = [...result_operation];
+      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, 3);
+
+      // Do the operation
+      let val_1 = parseInt(current_operation[0]),
+          val_2 = parseInt(current_operation[2]),
+          result = "0";
+          
+      if ((val_1 + val_2) >= 1) { result = "1"; }
+
+      result_operation.splice(gate_info.index_gates[i] - correction_index, 3, result),
+      correction_index += increment_correction_index;
+    }
+  }
+  return result_operation;
+}
+
 function calcFormula (operation, variables, num_variables, arr_results_num) { 
   // Change the Formula to a Logial or operational formula
   let binValues = getBinFormulaValues(num_variables, arr_results_num);
@@ -177,7 +222,10 @@ function calcFormula (operation, variables, num_variables, arr_results_num) {
         logical_operation[e] = binValues[i][index_logical_value];
       }
     }
-    console.log(logical_operation);
+    
+    // Calculate the Logical Operation in the PEMDAS Sistem.
+    let logical_or_output = calcOrGate(logical_operation);
+    let logical_and_output = calcAndGate(logical_operation);
   }
 
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */

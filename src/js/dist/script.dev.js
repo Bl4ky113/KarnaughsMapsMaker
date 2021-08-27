@@ -158,6 +158,55 @@ function getBinFormulaValues(num_variables, arr_results_num) {
   return binValues;
 }
 
+function checkForGates(index_gate, logical_operation) {
+  var info_obj = {
+    thereIsGates: false,
+    numGates: 0,
+    index_gates: []
+  };
+
+  var operation = _toConsumableArray(logical_operation);
+
+  operation.forEach(function (element) {
+    if (element === operators[index_gate]) {
+      info_obj.thereIsGates = true;
+      info_obj.numGates += 1;
+      info_obj.index_gates.push(operation.indexOf(element));
+      operation[operation.indexOf(element)] = null;
+    }
+  });
+  return info_obj;
+}
+
+function calcOrGate(logical_operation) {
+  var gate_info = checkForGates(0, logical_operation),
+      increment_correction_index = 2;
+
+  var result_operation = _toConsumableArray(logical_operation),
+      correction_index = 1;
+
+  if (gate_info.thereIsGates === true) {
+    var current_operation = []; // Get Every single individual operation in the formula
+
+    for (var i = 0; i < gate_info.numGates; i += 1) {
+      current_operation = _toConsumableArray(result_operation);
+      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, 3); // Do the operation
+
+      var val_1 = parseInt(current_operation[0]),
+          val_2 = parseInt(current_operation[2]),
+          result = "0";
+
+      if (val_1 + val_2 >= 1) {
+        result = "1";
+      }
+
+      result_operation.splice(gate_info.index_gates[i] - correction_index, 3, result), correction_index += increment_correction_index;
+    }
+  }
+
+  return result_operation;
+}
+
 function calcFormula(operation, variables, num_variables, arr_results_num) {
   // Change the Formula to a Logial or operational formula
   var binValues = getBinFormulaValues(num_variables, arr_results_num);
@@ -170,9 +219,11 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
         var index_logical_value = variables.indexOf(logical_operation[e]);
         logical_operation[e] = binValues[i][index_logical_value];
       }
-    }
+    } // Calculate the Logical Operation in the PEMDAS Sistem.
 
-    console.log(logical_operation);
+
+    var logical_or_output = calcOrGate(logical_operation);
+    var logical_and_output = calcAndGate(logical_operation);
   }
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
   // let values_formulas = [];
