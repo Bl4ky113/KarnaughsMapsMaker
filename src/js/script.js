@@ -34,6 +34,7 @@ var formula_info = {
   operation: "",
   text: "",
   results: {},
+  ready_to_go: true
 };
 
 function isNumber (char) {
@@ -182,11 +183,35 @@ function checkForGates (index_gate, logical_operation) {
   return info_obj;
 }
 
-function calcOrGate (logical_operation) {
-  const gate_info = checkForGates(0, logical_operation),
-        increment_correction_index = 2;
-  var result_operation = [...logical_operation],
-      correction_index = 1;
+const gate = {
+  or: (value_1, value_2) => {
+    let operation = value_1 + value_2;
+    if (operation >= 1) { return "1"; }
+      else { return "0"; }
+  },
+  and: (value_1, value_2) => {
+    let operation = value_1 + value_2;
+    if (operation > 1) { return "1"; }
+      else { return "0"; }
+  },
+  not: (value_1) => {
+    if (value_1 === 0) { return "1"; }
+      else { return "0"; }
+  }
+}
+
+function calcGate (logical_operation, logical_gate_function, logical_operator_index) {
+  const gate_info = checkForGates(logical_operator_index, logical_operation);
+  let result_operation = [...logical_operation],
+      correction_index = 1,
+      increment_correction_index = 2,
+      num_to_del = 3;
+  
+  if (logical_operator_index === 2) {
+    correction_index = 0,
+    increment_correction_index = 1,
+    num_to_del = 2;
+  }
   
   if (gate_info.thereIsGates === true) {
     let current_operation = [];
@@ -194,16 +219,21 @@ function calcOrGate (logical_operation) {
     // Get Every single individual operation in the formula
     for (let i = 0; i < gate_info.numGates; i += 1) {
       current_operation = [...result_operation];
-      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, 3);
+      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del);
 
       // Do the operation
-      let val_1 = parseInt(current_operation[0]),
-          val_2 = parseInt(current_operation[2]),
-          result = "0";
-          
-      if ((val_1 + val_2) >= 1) { result = "1"; }
+      let result = 0;
 
-      result_operation.splice(gate_info.index_gates[i] - correction_index, 3, result),
+      if (logical_operator_index === 2) {
+        let val_1 = parseInt(current_operation[1]);
+        result = logical_gate_function(val_1);
+      } else {
+        let val_1 = parseInt(current_operation[0]),
+            val_2 = parseInt(current_operation[2]);
+        result = logical_gate_function(val_1, val_2);
+      }
+
+      result_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del, result),
       correction_index += increment_correction_index;
     }
   }
@@ -223,9 +253,21 @@ function calcFormula (operation, variables, num_variables, arr_results_num) {
       }
     }
     
-    // Calculate the Logical Operation in the PEMDAS Sistem.
-    let logical_or_output = calcOrGate(logical_operation);
-    let logical_and_output = calcAndGate(logical_operation);
+    // Calculate the Logical Operation in the PEMDAS System.
+    let logical_not_output = calcGate(logical_operation, gate.not, 2);
+    if (logical_not_output != logical_operation) { logical_operation = [...logical_not_output]; }
+    
+    let logical_and_output = calcGate(logical_operation, gate.and, 1);
+    if (logical_and_output != logical_operation) { logical_operation = [...logical_and_output]; }
+    
+    let logical_or_output = calcGate(logical_operation, gate.or, 0);
+    if (logical_or_output != logical_operation) { logical_operation = [...logical_or_output]; }
+    
+    if (logical_operation.length > 1) {
+      alert("Debes ingresar una Formula con Operadores Lógicos Validos");
+      formula_info.ready_to_go = false;
+      break;
+    }
   }
 
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
@@ -278,9 +320,9 @@ function calcFormula (operation, variables, num_variables, arr_results_num) {
 input.formula.oninput = (event) => {
   formula_info.raw = input.formula.value.toUpperCase();
   formula_info.operation = formula_info.raw.split("");
+  formula_info.ready_to_go = true;
 
   // Check if there's any number in the Formula, which is bad btw
-  let formula_rawArr = formula_info.raw.split("");
   let variables =  getVariables(formula_info.raw);
   formula_info.var = {
     num_var: variables[0],
@@ -290,8 +332,21 @@ input.formula.oninput = (event) => {
 }
 
 input.startBtn.onclick = (event) => {
-  calcFormula(formula_info.operation, formula_info.var.arr_var, formula_info.var.num_var, formula_info.var.arr_num_res);
-  changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var);
+  if (input.formula.value === "") {
+    alert("Primero debes ingresar una formula valida");
+    formula_info.ready_to_go = false;
+  } else {
+    if (formula_info.var.num_var < 2 || formula_info.var.num_var > 4) {
+      alert("Debes Ingresar una formula que tenga entre 2 y 4 variables");
+      formula_info.ready_to_go = false;
+    }
+  }
+
+  formula_info.results = calcFormula(formula_info.operation, formula_info.var.arr_var, formula_info.var.num_var, formula_info.var.arr_num_res);
+  
+  if (formula_info.ready_to_go === true) {
+    changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var);
+  }
 }
 
 /* Matrices Inversas para solucionar la formula */

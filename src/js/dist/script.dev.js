@@ -26,7 +26,8 @@ var formula_info = {
   raw: "",
   operation: "",
   text: "",
-  results: {}
+  results: {},
+  ready_to_go: true
 };
 
 function isNumber(_char) {
@@ -178,29 +179,66 @@ function checkForGates(index_gate, logical_operation) {
   return info_obj;
 }
 
-function calcOrGate(logical_operation) {
-  var gate_info = checkForGates(0, logical_operation),
-      increment_correction_index = 2;
+var gate = {
+  or: function or(value_1, value_2) {
+    var operation = value_1 + value_2;
+
+    if (operation >= 1) {
+      return "1";
+    } else {
+      return "0";
+    }
+  },
+  and: function and(value_1, value_2) {
+    var operation = value_1 + value_2;
+
+    if (operation > 1) {
+      return "1";
+    } else {
+      return "0";
+    }
+  },
+  not: function not(value_1) {
+    if (value_1 === 0) {
+      return "1";
+    } else {
+      return "0";
+    }
+  }
+};
+
+function calcGate(logical_operation, logical_gate_function, logical_operator_index) {
+  var gate_info = checkForGates(logical_operator_index, logical_operation);
 
   var result_operation = _toConsumableArray(logical_operation),
-      correction_index = 1;
+      correction_index = 1,
+      increment_correction_index = 2,
+      num_to_del = 3;
+
+  if (logical_operator_index === 2) {
+    correction_index = 0, increment_correction_index = 1, num_to_del = 2;
+  }
 
   if (gate_info.thereIsGates === true) {
     var current_operation = []; // Get Every single individual operation in the formula
 
     for (var i = 0; i < gate_info.numGates; i += 1) {
       current_operation = _toConsumableArray(result_operation);
-      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, 3); // Do the operation
+      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del); // Do the operation
 
-      var val_1 = parseInt(current_operation[0]),
-          val_2 = parseInt(current_operation[2]),
-          result = "0";
+      var result = 0;
 
-      if (val_1 + val_2 >= 1) {
-        result = "1";
+      if (logical_operator_index === 2) {
+        var val_1 = parseInt(current_operation[1]);
+        result = logical_gate_function(val_1);
+      } else {
+        var _val_ = parseInt(current_operation[0]),
+            val_2 = parseInt(current_operation[2]);
+
+        result = logical_gate_function(_val_, val_2);
       }
 
-      result_operation.splice(gate_info.index_gates[i] - correction_index, 3, result), correction_index += increment_correction_index;
+      result_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del, result), correction_index += increment_correction_index;
     }
   }
 
@@ -219,11 +257,32 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
         var index_logical_value = variables.indexOf(logical_operation[e]);
         logical_operation[e] = binValues[i][index_logical_value];
       }
-    } // Calculate the Logical Operation in the PEMDAS Sistem.
+    } // Calculate the Logical Operation in the PEMDAS System.
 
 
-    var logical_or_output = calcOrGate(logical_operation);
-    var logical_and_output = calcAndGate(logical_operation);
+    var logical_not_output = calcGate(logical_operation, gate.not, 2);
+
+    if (logical_not_output != logical_operation) {
+      logical_operation = _toConsumableArray(logical_not_output);
+    }
+
+    var logical_and_output = calcGate(logical_operation, gate.and, 1);
+
+    if (logical_and_output != logical_operation) {
+      logical_operation = _toConsumableArray(logical_and_output);
+    }
+
+    var logical_or_output = calcGate(logical_operation, gate.or, 0);
+
+    if (logical_or_output != logical_operation) {
+      logical_operation = _toConsumableArray(logical_or_output);
+    }
+
+    if (logical_operation.length > 1) {
+      alert("Debes ingresar una Formula con Operadores Lógicos Validos");
+      formula_info.ready_to_go = false;
+      break;
+    }
   }
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
   // let values_formulas = [];
@@ -268,9 +327,9 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
 
 input.formula.oninput = function (event) {
   formula_info.raw = input.formula.value.toUpperCase();
-  formula_info.operation = formula_info.raw.split(""); // Check if there's any number in the Formula, which is bad btw
+  formula_info.operation = formula_info.raw.split("");
+  formula_info.ready_to_go = true; // Check if there's any number in the Formula, which is bad btw
 
-  var formula_rawArr = formula_info.raw.split("");
   var variables = getVariables(formula_info.raw);
   formula_info["var"] = {
     num_var: variables[0],
@@ -280,7 +339,20 @@ input.formula.oninput = function (event) {
 };
 
 input.startBtn.onclick = function (event) {
-  calcFormula(formula_info.operation, formula_info["var"].arr_var, formula_info["var"].num_var, formula_info["var"].arr_num_res);
-  changeTableLayout(formula_info["var"].num_var, formula_info["var"].arr_var);
+  if (input.formula.value === "") {
+    alert("Primero debes ingresar una formula valida");
+    formula_info.ready_to_go = false;
+  } else {
+    if (formula_info["var"].num_var < 2 || formula_info["var"].num_var > 4) {
+      alert("Debes Ingresar una formula que tenga entre 2 y 4 variables");
+      formula_info.ready_to_go = false;
+    }
+  }
+
+  formula_info.results = calcFormula(formula_info.operation, formula_info["var"].arr_var, formula_info["var"].num_var, formula_info["var"].arr_num_res);
+
+  if (formula_info.ready_to_go === true) {
+    changeTableLayout(formula_info["var"].num_var, formula_info["var"].arr_var);
+  }
 };
 /* Matrices Inversas para solucionar la formula */
