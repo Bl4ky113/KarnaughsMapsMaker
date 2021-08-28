@@ -92,9 +92,6 @@ function changeTableLayout (num_var, var_arr, num_results, result_arr) {
   }
 
   output.table.className = `table table--var${num_var}`;
-  
-  let rowNum = 0;
-  let colNum = 0;
 
   let value_div_row = [];
   let value_div_col = [];
@@ -108,44 +105,32 @@ function changeTableLayout (num_var, var_arr, num_results, result_arr) {
   }
 
   let separator = `<div class="separator"></div>`;
+  var_arr.splice(Math.floor(var_arr.length / 2), 0, separator),
+  var_arr = var_arr.join("");
+
   let variables_div = document.createElement("div");
-  variables_div.className = "variables";
+  variables_div.className = "variables",
+  variables_div.innerHTML = var_arr;
 
-  if (num_var === 2) {
-    variables_div.innerHTML = `${var_arr[0]} ${separator} ${var_arr[1]}`
-
-    rowNum = 2;
-    colNum = 2;
-  } else if (num_var === 3) {
-    variables_div.innerHTML = `${var_arr[0]} ${separator} ${var_arr[1]}${var_arr[2]}`
-
-    rowNum = 4;
-    colNum = 2;
-  } else if (num_var === 4) {
-    variables_div.innerHTML = `${var_arr[0]}${var_arr[1]} ${separator} ${var_arr[2]}${var_arr[3]}`
-
-    rowNum = 4;
-    colNum = 4;
-  }
   output.table.appendChild(variables_div);
 
-  for (let i = 0; rowNum > i; i += 1) {
-    if (rowNum == 2) {
+  for (let i = 0; num_results[1] > i; i += 1) {
+    if (num_results[1] == 2) {
       value_div_row[i].innerHTML = value_div_row[i].innerHTML.substring(1);
     }
     output.table.appendChild(value_div_row[i]);
   }
   
-  for (let i = 0; colNum > i; i += 1) {
-    if (colNum == 2) {
+  for (let i = 0; num_results[0] > i; i += 1) {
+    if (num_results[0] == 2) {
       value_div_col[i].innerHTML = value_div_col[i].innerHTML.substring(1);
     }
     output.table.appendChild(value_div_col[i]);
 
-    for (let e = 0; rowNum > e; e += 1 ) {
+    for (let e = 0; num_results[1] > e; e += 1 ) {
       let result_div = document.createElement("div");
       result_div.className = "result";
-      result_div.innerHTML = "1";
+      result_div.innerHTML = result_arr[`row_${i}`][e];
       output.table.appendChild(result_div);
     }
   }
@@ -276,17 +261,20 @@ function calcFormula (operation, variables, num_variables, arr_results_num) {
   }
 
   // Return the results from the operation in order (row_i: col_1 col_2... col_i) 
-
-  for (let i = 0; i <= arr_results_num[0]; i += arr_results_num[0]) {
+  let row_number = 0;
+  let row_index = 0;
+  for (let i = 0; i < arr_results_num[0]; i += 1) {
     let results_columns = [];
-    for (let e = 0; e < arr_results_num[1]; e += 1) results_columns.push(results_arr[e + i]);
-    results_obj[`row${i}`] = [...results_columns];
+    for (let e = 0; e < arr_results_num[1]; e += 1) results_columns.push(results_arr[e + row_index]);
+    results_obj[`row_${row_number}`] = [...results_columns];
+    row_number += 1;
+    row_index += arr_results_num[1];
   }
 
   return results_obj;
   
   /* I want to leave this huge peace of code, and shit, as a mistake to learn from */
-  
+
   // let values_formulas = [];
   // var values_variables = [];
   

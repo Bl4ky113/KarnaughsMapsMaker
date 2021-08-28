@@ -84,8 +84,6 @@ function changeTableLayout(num_var, var_arr, num_results, result_arr) {
   }
 
   output.table.className = "table table--var".concat(num_var);
-  var rowNum = 0;
-  var colNum = 0;
   var value_div_row = [];
   var value_div_col = [];
 
@@ -97,44 +95,30 @@ function changeTableLayout(num_var, var_arr, num_results, result_arr) {
   }
 
   var separator = "<div class=\"separator\"></div>";
+  var_arr.splice(Math.floor(var_arr.length / 2), 0, separator), var_arr = var_arr.join("");
   var variables_div = document.createElement("div");
-  variables_div.className = "variables";
-
-  if (num_var === 2) {
-    variables_div.innerHTML = "".concat(var_arr[0], " ").concat(separator, " ").concat(var_arr[1]);
-    rowNum = 2;
-    colNum = 2;
-  } else if (num_var === 3) {
-    variables_div.innerHTML = "".concat(var_arr[0], " ").concat(separator, " ").concat(var_arr[1]).concat(var_arr[2]);
-    rowNum = 4;
-    colNum = 2;
-  } else if (num_var === 4) {
-    variables_div.innerHTML = "".concat(var_arr[0]).concat(var_arr[1], " ").concat(separator, " ").concat(var_arr[2]).concat(var_arr[3]);
-    rowNum = 4;
-    colNum = 4;
-  }
-
+  variables_div.className = "variables", variables_div.innerHTML = var_arr;
   output.table.appendChild(variables_div);
 
-  for (var _i3 = 0; rowNum > _i3; _i3 += 1) {
-    if (rowNum == 2) {
+  for (var _i3 = 0; num_results[1] > _i3; _i3 += 1) {
+    if (num_results[1] == 2) {
       value_div_row[_i3].innerHTML = value_div_row[_i3].innerHTML.substring(1);
     }
 
     output.table.appendChild(value_div_row[_i3]);
   }
 
-  for (var _i4 = 0; colNum > _i4; _i4 += 1) {
-    if (colNum == 2) {
+  for (var _i4 = 0; num_results[0] > _i4; _i4 += 1) {
+    if (num_results[0] == 2) {
       value_div_col[_i4].innerHTML = value_div_col[_i4].innerHTML.substring(1);
     }
 
     output.table.appendChild(value_div_col[_i4]);
 
-    for (var e = 0; rowNum > e; e += 1) {
+    for (var e = 0; num_results[1] > e; e += 1) {
       var result_div = document.createElement("div");
       result_div.className = "result";
-      result_div.innerHTML = "1";
+      result_div.innerHTML = result_arr["row_".concat(_i4)][e];
       output.table.appendChild(result_div);
     }
   }
@@ -291,14 +275,19 @@ function calcFormula(operation, variables, num_variables, arr_results_num) {
   } // Return the results from the operation in order (row_i: col_1 col_2... col_i) 
 
 
-  for (var _i5 = 0; _i5 <= arr_results_num[0]; _i5 += arr_results_num[0]) {
+  var row_number = 0;
+  var row_index = 0;
+
+  for (var _i5 = 0; _i5 < arr_results_num[0]; _i5 += 1) {
     var results_columns = [];
 
     for (var _e = 0; _e < arr_results_num[1]; _e += 1) {
-      results_columns.push(results_arr[_e + _i5]);
+      results_columns.push(results_arr[_e + row_index]);
     }
 
-    results_obj["row".concat(_i5)] = [].concat(results_columns);
+    results_obj["row_".concat(row_number)] = [].concat(results_columns);
+    row_number += 1;
+    row_index += arr_results_num[1];
   }
 
   return results_obj;
