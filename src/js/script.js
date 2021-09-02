@@ -2,7 +2,8 @@
 
 const get = {
   id: document.getElementById.bind(document),
-  class: document.getElementsByClassName.bind(document)
+  class: document.getElementsByClassName.bind(document),
+  inArr: (arr, val) => { return arr.indexOf(val) >= 0 ? true : false; }
 };
 
 const input = {
@@ -14,21 +15,6 @@ let output = {
   table: get.id("output_table")
 };
 
-const operators = [
-  "+",
-  "*",
-  "-",
-  "(",
-  ")"
-];
-
-const value_var = [
-  "00", 
-  "01", 
-  "10", 
-  "11"
-];
-
 var formula_info = {
   raw: "",
   operation: "",
@@ -37,47 +23,36 @@ var formula_info = {
   ready_to_go: true
 };
 
-function isNumber (char) {
-  if ( isNaN( parseInt(char) ) ) { 
-    return false; 
-  } else { 
-    return true;
-  }
-} 
+const operators = ["+", "*", "-", "(", ")"],
+      gate = {
+        or: (value_1, value_2) => { let operation = value_1 + value_2; return (operation >= 1 ? "1" : "0"); },
+        and: (value_1, value_2) => { let operation = value_1 + value_2; return (operation > 1 ? "1" : "0"); },
+        not: (value_1) => { return (value_1 == 1 ? "0" : "1"); }
+      };
 
-function isInArray (array, char) {
-  if ( array.indexOf(char) >= 0) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-function getVariables (raw_formula) {
-  let varNum = 0;
-  let resVar = [0, 0];
-  let formulaVar = [];
-
-  raw_formula = raw_formula.split("");
-  for (let i = 0; i < raw_formula.length; i += 1) {
-    if (typeof raw_formula[i] === "string" && !(isNumber(raw_formula[i]))) {
-      // Skip if is an operator Or if it is already a variable
-      if ( !(isInArray(operators, raw_formula[i])) && !(isInArray(formulaVar, raw_formula[i])) ) { 
-        formulaVar.push(raw_formula[i]);
-        varNum += 1;
-      }
-    } else {
-      alert("Intenta Ingresar solo Variables y sus Operadores Lógicos");
-      break;
+function getVariables (arr_formula) {
+  let var_obj = {
+    num_variables: 0,
+    formula_variables: [],
+    num_results: {
+      row: 0,
+      col: 0,
     }
-  }
+  };
 
-  for (let i = 0; i < formulaVar.length; i += 1) {
-    if ((i + 1) % 2 == 0) resVar[0] += 2;
-    else resVar[1] += 2;
-  }
+  arr_formula.forEach(element => {
+    let conditional_1 = typeof element === "string" && isNaN(parseInt(element));
+    let conditional_2 = !get.inArr(operators, element) && !get.inArr(var_obj.formula_variables, element);
+    if (conditional_1 && conditional_2) {
+      var_obj.formula_variables.push(element);
+      var_obj.num_variables += 1;
+    }
+  });
 
-  return [varNum, resVar, formulaVar];
+  var_obj.formula_variables.forEach((element, index) => { ((index + 1) % 2 == 0) ? var_obj.num_results.row += 2 : var_obj.num_results.col += 2; })
+  var_obj.num_results.num = var_obj.num_results.row * var_obj.num_results.col;
+
+  return var_obj;
 }
 
 // Change the content of the input in the Formula
@@ -85,61 +60,59 @@ function changeFormula (raw_formula) {
   raw_formulaArr = raw_fromula.split("");
 }
 
-function changeTableLayout (num_var, var_arr, num_results, result_arr) {
+function changeTableLayout (num_var, var_arr, num_results, results_obj) {
   // Delete every single Obj within the table
-  for (let i = 1; output.table.childNodes.length >= 1; i += 1) {
-    output.table.removeChild(output.table.childNodes[0]);
-  }
-
+  while (output.table.childNodes.length > 0) { output.table.removeChild(output.table.childNodes[0]); }
   output.table.className = `table table--var${num_var}`;
 
-  let value_div_row = [];
-  let value_div_col = [];
-
-  for (let i = 0; 4 > i; i += 1) {
-    value_div_row.push(document.createElement("div"));
-    value_div_row[i].className = "value";
-    value_div_row[i].innerHTML = value_var[i];
-    
-    value_div_col[i] = value_div_row[i].cloneNode(true);
-  }
-
+  // Add the Variables Cell
   let separator = `<div class="separator"></div>`;
   var_arr.splice(Math.floor(var_arr.length / 2), 0, separator),
   var_arr = var_arr.join("");
-
+  
   let variables_div = document.createElement("div");
-  variables_div.className = "variables",
-  variables_div.innerHTML = var_arr;
+      variables_div.className = "variables";
+      variables_div.innerHTML = var_arr;
 
   output.table.appendChild(variables_div);
 
-  for (let i = 0; num_results[1] > i; i += 1) {
-    if (num_results[1] == 2) {
-      value_div_row[i].innerHTML = value_div_row[i].innerHTML.substring(1);
-    }
-    output.table.appendChild(value_div_row[i]);
+  // Add the Column Values of the Variables
+  let bin_val = {
+    col: getBinFormulaValues(num_results.col / 2, num_results.col),
+    row: getBinFormulaValues(num_results.row / 2, num_results.row)
+  };
+
+  for (let i = 0; num_results.col > i; i += 1) {
+    let value_div = document.createElement("div");
+        value_div.className = "value";
+        value_div.innerHTML = bin_val.col[i].join("");
+
+    output.table.appendChild(value_div);
   }
   
-  for (let i = 0; num_results[0] > i; i += 1) {
-    if (num_results[0] == 2) {
-      value_div_col[i].innerHTML = value_div_col[i].innerHTML.substring(1);
-    }
-    output.table.appendChild(value_div_col[i]);
+  // Add the Row Values of the Variables
+  for (let i = 0; num_results.row > i; i += 1) {
+    let value_div = document.createElement("div");
+        value_div.className = "value";
+        value_div.innerHTML = bin_val.row[i].join("");
 
-    for (let e = 0; num_results[1] > e; e += 1 ) {
+    output.table.appendChild(value_div);
+
+    // Add the Results of the Operation
+    results_obj[`row_${i}`].forEach(element => {
       let result_div = document.createElement("div");
-      result_div.className = "result";
-      result_div.innerHTML = result_arr[`row_${i}`][e];
+          result_div.className = "result";
+          result_div.innerHTML = element;
+
       output.table.appendChild(result_div);
-    }
+    })
   }
 }
 
-function getBinFormulaValues (num_variables, arr_results_num) {
+function getBinFormulaValues (num_variables, num_results) {
   let binValues = [];
   let dec_num = 0;
-  for (let i = 0; i < (arr_results_num[0] * arr_results_num[1]); i += 1) {
+  for (let i = 0; i < num_results; i += 1) {
     dec_num = i;
     let str_num = (dec_num).toString(2);
     let arr_num = str_num.split("");
@@ -157,49 +130,32 @@ function checkForGates (index_gate, logical_operation) {
     numGates: 0,
     index_gates: []
   };
-  let operation = [...logical_operation];
+  let gate_operation = [...logical_operation];
 
-  operation.forEach(element => { if (element === operators[index_gate]) { 
-    info_obj.thereIsGates = true; 
+  gate_operation.forEach(element => { if (element === operators[index_gate]) { 
+    info_obj.thereIsGates = true;
     info_obj.numGates += 1;
-    info_obj.index_gates.push(operation.indexOf(element));
-    operation[operation.indexOf(element)] = null;
+    info_obj.index_gates.push(gate_operation.indexOf(element));
+    gate_operation[gate_operation.indexOf(element)] = null;
   }});
   return info_obj;
 }
 
-const gate = {
-  or: (value_1, value_2) => {
-    let operation = value_1 + value_2;
-    if (operation >= 1) { return "1"; }
-      else { return "0"; }
-  },
-  and: (value_1, value_2) => {
-    let operation = value_1 + value_2;
-    if (operation > 1) { return "1"; }
-      else { return "0"; }
-  },
-  not: (value_1) => {
-    if (value_1 === 0) { return "1"; }
-      else { return "0"; }
-  }
-}
-
 function calcGate (logical_operation, logical_gate_function, logical_operator_index) {
   const gate_info = checkForGates(logical_operator_index, logical_operation);
-  let result_operation = [...logical_operation],
-      correction_index = 1,
-      increment_correction_index = 2,
-      num_to_del = 3;
-  
-  if (logical_operator_index === 2) {
-    correction_index = 0,
-    increment_correction_index = 1,
-    num_to_del = 2;
-  }
+  let result_operation = [...logical_operation];
   
   if (gate_info.thereIsGates === true) {
-    let current_operation = [];
+    let current_operation = [],
+        correction_index = 1,
+        increment_correction_index = 2,
+        num_to_del = 3;
+    
+    if (logical_operator_index === 2) {
+      correction_index = 0,
+      increment_correction_index = 1,
+      num_to_del = 2;
+    }
 
     // Get Every single individual operation in the formula
     for (let i = 0; i < gate_info.numGates; i += 1) {
@@ -211,10 +167,12 @@ function calcGate (logical_operation, logical_gate_function, logical_operator_in
 
       if (logical_operator_index === 2) {
         let val_1 = parseInt(current_operation[1]);
+
         result = logical_gate_function(val_1);
       } else {
         let val_1 = parseInt(current_operation[0]),
             val_2 = parseInt(current_operation[2]);
+
         result = logical_gate_function(val_1, val_2);
       }
 
@@ -225,50 +183,51 @@ function calcGate (logical_operation, logical_gate_function, logical_operator_in
   return result_operation;
 }
 
-function calcFormula (operation, variables, num_variables, arr_results_num) { 
+function calcFormula (operation, variables, num_variables, num_results) { 
   // Change the Formula to a Logial or operational formula
-  let binValues = getBinFormulaValues(num_variables, arr_results_num);
-  let results_arr = [];
-  let results_obj = {};
+  let binValues = getBinFormulaValues(num_variables, num_results.num),
+      results_arr = [],
+      results_obj = {};
 
-  for (let i = 0; i < (arr_results_num[0] * arr_results_num[1]); i += 1) {
+  binValues.forEach((binArr) => {
+    if (formula_info.ready_to_go === false) { return; }
+
     let logical_operation = [...operation];
-    for (let e = 0; e < logical_operation.length; e += 1) {
-      if (isInArray(variables, operation[e])) {
-        let index_logical_value = variables.indexOf(logical_operation[e]);
-        logical_operation[e] = binValues[i][index_logical_value];
+
+    logical_operation.forEach((element, index) => {
+      if (get.inArr(variables, element)) {
+        let index_logical_value = variables.indexOf(element);
+        logical_operation[index] = binArr[index_logical_value];
       }
-    }
+    })
     
     // Calculate the Logical Operation in the PEMDAS System.
-    let logical_not_output = calcGate(logical_operation, gate.not, 2);
-    if (logical_not_output != logical_operation) { logical_operation = [...logical_not_output]; }
+    let logical_not_output = calcGate(logical_operation, gate.not, 2),
+        logical_and_output = calcGate(logical_not_output, gate.and, 1),
+        logical_or_output = calcGate(logical_and_output, gate.or, 0);
     
-    let logical_and_output = calcGate(logical_operation, gate.and, 1);
-    if (logical_and_output != logical_operation) { logical_operation = [...logical_and_output]; }
-    
-    let logical_or_output = calcGate(logical_operation, gate.or, 0);
     if (logical_or_output != logical_operation) { logical_operation = [...logical_or_output]; }
     
     if (logical_operation.length > 1 && formula_info.ready_to_go === true) {
       alert("Debes ingresar una Formula con Operadores Lógicos Validos");
       formula_info.ready_to_go = false;
-      break;
+      return;
     } else {
       logical_operation = logical_operation.join();
       results_arr.push(logical_operation);
-    }
-  }
+    }  
+  })
 
   // Return the results from the operation in order (row_i: col_1 col_2... col_i) 
-  let row_number = 0;
   let row_index = 0;
-  for (let i = 0; i < arr_results_num[0]; i += 1) {
+  for (let i = 0; i < num_results.row; i += 1) {
     let results_columns = [];
-    for (let e = 0; e < arr_results_num[1]; e += 1) results_columns.push(results_arr[e + row_index]);
-    results_obj[`row_${row_number}`] = [...results_columns];
-    row_number += 1;
-    row_index += arr_results_num[1];
+
+    for (let e = 0; e < num_results.col; e += 1) results_columns.push(results_arr[e + row_index]);
+
+    results_obj[`row_${i}`] = [...results_columns];
+
+    row_index += num_results.col;
   }
 
   return results_obj;
@@ -325,31 +284,35 @@ input.formula.oninput = (event) => {
   formula_info.raw = input.formula.value.toUpperCase();
   formula_info.operation = formula_info.raw.split("");
   formula_info.ready_to_go = true;
-
-  // Check if there's any number in the Formula, which is bad btw
-  let variables =  getVariables(formula_info.raw);
-  formula_info.var = {
-    num_var: variables[0],
-    arr_num_res: variables[1],
-    arr_var: variables[2]
-  };
 }
 
 input.startBtn.onclick = (event) => {
+  formula_info.var = getVariables(formula_info.operation);
+
   if (input.formula.value === "") {
     alert("Primero debes ingresar una formula valida");
     formula_info.ready_to_go = false;
   } else {
-    if (formula_info.var.num_var < 2 || formula_info.var.num_var > 4) {
+    if (formula_info.var.num_variables < 2 || formula_info.var.num_variables > 4) {
       alert("Debes Ingresar una formula que tenga entre 2 y 4 variables");
       formula_info.ready_to_go = false;
     }
   }
 
-  formula_info.results = calcFormula(formula_info.operation, formula_info.var.arr_var, formula_info.var.num_var, formula_info.var.arr_num_res);
+  formula_info.results = calcFormula(
+    formula_info.operation, 
+    formula_info.var.formula_variables, 
+    formula_info.var.num_variables, 
+    formula_info.var.num_results
+  );
 
   if (formula_info.ready_to_go === true) {
-    changeTableLayout(formula_info.var.num_var, formula_info.var.arr_var, formula_info.var.arr_num_res, formula_info.results);
+    changeTableLayout(
+      formula_info.var.num_variables, 
+      formula_info.var.formula_variables, 
+      formula_info.var.num_results, 
+      formula_info.results
+    );
   }
 }
 
