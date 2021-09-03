@@ -43,7 +43,11 @@ var operators = ["+", "*", "-", "(", ")"],
   not: function not(value_1) {
     return value_1 == 1 ? "0" : "1";
   }
-};
+}; // Change the content of the input in the Formula
+
+function changeFormula(raw_formula) {
+  raw_formulaArr = raw_fromula.split("");
+}
 
 function getVariables(arr_formula) {
   var var_obj = {
@@ -68,132 +72,6 @@ function getVariables(arr_formula) {
   });
   var_obj.num_results.num = var_obj.num_results.row * var_obj.num_results.col;
   return var_obj;
-} // Change the content of the input in the Formula
-
-
-function changeFormula(raw_formula) {
-  raw_formulaArr = raw_fromula.split("");
-}
-
-function changeTableLayout(num_var, var_arr, num_results, results_obj) {
-  // Delete every single Obj within the table
-  while (output.table.childNodes.length > 0) {
-    output.table.removeChild(output.table.childNodes[0]);
-  }
-
-  output.table.className = "table table--var".concat(num_var); // Add the Variables Cell
-
-  var separator = "<div class=\"separator\"></div>";
-  var_arr.splice(Math.floor(var_arr.length / 2), 0, separator), var_arr = var_arr.join("");
-  var variables_div = document.createElement("div");
-  variables_div.className = "variables";
-  variables_div.innerHTML = var_arr;
-  output.table.appendChild(variables_div); // Add the Column Values of the Variables
-
-  var bin_val = {
-    col: getBinFormulaValues(num_results.col / 2, num_results.col),
-    row: getBinFormulaValues(num_results.row / 2, num_results.row)
-  };
-
-  for (var i = 0; num_results.col > i; i += 1) {
-    var value_div = document.createElement("div");
-    value_div.className = "value";
-    value_div.innerHTML = bin_val.col[i].join("");
-    output.table.appendChild(value_div);
-  } // Add the Row Values of the Variables
-
-
-  for (var _i = 0; num_results.row > _i; _i += 1) {
-    var _value_div = document.createElement("div");
-
-    _value_div.className = "value";
-    _value_div.innerHTML = bin_val.row[_i].join("");
-    output.table.appendChild(_value_div); // Add the Results of the Operation
-
-    results_obj["row_".concat(_i)].forEach(function (element) {
-      var result_div = document.createElement("div");
-      result_div.className = "result";
-      result_div.innerHTML = element;
-      output.table.appendChild(result_div);
-    });
-  }
-}
-
-function getBinFormulaValues(num_variables, num_results) {
-  var binValues = [],
-      dec_num = 0;
-
-  for (var i = 0; i < num_results; i += 1) {
-    dec_num = i;
-    var str_num = dec_num.toString(2),
-        arr_num = str_num.split("");
-
-    while (arr_num.length !== num_variables) {
-      arr_num = ["0"].concat(_toConsumableArray(arr_num));
-    }
-
-    binValues.push(arr_num);
-  }
-
-  return binValues;
-}
-
-function checkForGates(index_gate, logical_operation) {
-  var gate_operation = _toConsumableArray(logical_operation),
-      info_obj = {
-    thereIsGates: false,
-    numGates: 0,
-    index_gates: []
-  };
-
-  gate_operation.forEach(function (element) {
-    if (element === operators[index_gate]) {
-      info_obj.thereIsGates = true;
-      info_obj.numGates += 1;
-      info_obj.index_gates.push(gate_operation.indexOf(element));
-      gate_operation[gate_operation.indexOf(element)] = null;
-    }
-  });
-  return info_obj;
-}
-
-function calcGate(logical_operation, logical_gate_function, logical_operator_index) {
-  var gate_info = checkForGates(logical_operator_index, logical_operation);
-
-  var result_operation = _toConsumableArray(logical_operation);
-
-  if (gate_info.thereIsGates === true) {
-    var current_operation = [],
-        correction_index = 1,
-        increment_correction_index = 2,
-        num_to_del = 3;
-
-    if (logical_operator_index === 2) {
-      correction_index = 0, increment_correction_index = 1, num_to_del = 2;
-    } // Get Every single individual operation in the formula
-
-
-    gate_info.index_gates.forEach(function (element) {
-      current_operation = _toConsumableArray(result_operation);
-      current_operation = current_operation.splice(element - correction_index, num_to_del); // Do the operation
-
-      var result = 0;
-
-      if (logical_operator_index === 2) {
-        var val_1 = parseInt(current_operation[1]);
-        result = logical_gate_function(val_1);
-      } else {
-        var _val_ = parseInt(current_operation[0]),
-            val_2 = parseInt(current_operation[2]);
-
-        result = logical_gate_function(_val_, val_2);
-      }
-
-      result_operation.splice(element - correction_index, num_to_del, result), correction_index += increment_correction_index;
-    });
-  }
-
-  return result_operation;
 }
 
 function calcFormula(operation, variables, num_variables, num_results) {
@@ -285,6 +163,127 @@ function calcFormula(operation, variables, num_variables, num_results) {
   //   values_formulas.push(values_variables);
   //   console.log(values_formulas);
   // }
+}
+
+function getBinFormulaValues(num_variables, num_results) {
+  var binValues = [],
+      dec_num = 0;
+
+  for (var i = 0; i < num_results; i += 1) {
+    dec_num = i;
+    var str_num = dec_num.toString(2),
+        arr_num = str_num.split("");
+
+    while (arr_num.length !== num_variables) {
+      arr_num = ["0"].concat(_toConsumableArray(arr_num));
+    }
+
+    binValues.push(arr_num);
+  }
+
+  return binValues;
+}
+
+function calcGate(logical_operation, logical_gate_function, logical_operator_index) {
+  var gate_info = checkForGates(logical_operator_index, logical_operation);
+
+  var result_operation = _toConsumableArray(logical_operation);
+
+  if (gate_info.thereIsGates === true) {
+    var current_operation = [],
+        correction_index = 1,
+        increment_correction_index = 2,
+        num_to_del = 3;
+
+    if (logical_operator_index === 2) {
+      correction_index = 0, increment_correction_index = 1, num_to_del = 2;
+    } // Get Every single individual operation in the formula
+
+
+    gate_info.index_gates.forEach(function (element) {
+      current_operation = _toConsumableArray(result_operation);
+      current_operation = current_operation.splice(element - correction_index, num_to_del); // Do the operation
+
+      var result = 0;
+
+      if (logical_operator_index === 2) {
+        var val_1 = parseInt(current_operation[1]);
+        result = logical_gate_function(val_1);
+      } else {
+        var _val_ = parseInt(current_operation[0]),
+            val_2 = parseInt(current_operation[2]);
+
+        result = logical_gate_function(_val_, val_2);
+      }
+
+      result_operation.splice(element - correction_index, num_to_del, result), correction_index += increment_correction_index;
+    });
+  }
+
+  return result_operation;
+}
+
+function checkForGates(index_gate, logical_operation) {
+  var gate_operation = _toConsumableArray(logical_operation),
+      info_obj = {
+    thereIsGates: false,
+    numGates: 0,
+    index_gates: []
+  };
+
+  gate_operation.forEach(function (element) {
+    if (element === operators[index_gate]) {
+      info_obj.thereIsGates = true;
+      info_obj.numGates += 1;
+      info_obj.index_gates.push(gate_operation.indexOf(element));
+      gate_operation[gate_operation.indexOf(element)] = null;
+    }
+  });
+  return info_obj;
+}
+
+function changeTableLayout(num_var, var_arr, num_results, results_obj) {
+  // Delete every single Obj within the table
+  while (output.table.childNodes.length > 0) {
+    output.table.removeChild(output.table.childNodes[0]);
+  }
+
+  output.table.className = "table table--var".concat(num_var); // Add the Variables Cell
+
+  var separator = "<div class=\"separator\"></div>";
+  var_arr.splice(Math.floor(var_arr.length / 2), 0, separator), var_arr = var_arr.join("");
+  var variables_div = document.createElement("div");
+  variables_div.className = "variables";
+  variables_div.innerHTML = var_arr;
+  output.table.appendChild(variables_div); // Add the Column Values of the Variables
+
+  var bin_val = {
+    col: getBinFormulaValues(num_results.col / 2, num_results.col),
+    row: getBinFormulaValues(num_results.row / 2, num_results.row)
+  };
+
+  for (var i = 0; num_results.col > i; i += 1) {
+    var value_div = document.createElement("div");
+    value_div.className = "value";
+    value_div.innerHTML = bin_val.col[i].join("");
+    output.table.appendChild(value_div);
+  } // Add the Row Values of the Variables
+
+
+  for (var _i = 0; num_results.row > _i; _i += 1) {
+    var _value_div = document.createElement("div");
+
+    _value_div.className = "value";
+    _value_div.innerHTML = bin_val.row[_i].join("");
+    output.table.appendChild(_value_div); // Add the Results of the Operation
+
+    results_obj["row_".concat(_i)].forEach(function (element) {
+      var result_div = document.createElement("div");
+      result_div.className = "result";
+      result_div.innerHTML = element;
+      output.table.appendChild(result_div);
+    });
+  }
 }
 
 input.formula.oninput = function (event) {
