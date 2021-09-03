@@ -41,8 +41,8 @@ function getVariables (arr_formula) {
   };
 
   arr_formula.forEach(element => {
-    let conditional_1 = typeof element === "string" && isNaN(parseInt(element));
-    let conditional_2 = !get.inArr(operators, element) && !get.inArr(var_obj.formula_variables, element);
+    let conditional_1 = typeof element === "string" && isNaN(parseInt(element)),
+        conditional_2 = !get.inArr(operators, element) && !get.inArr(var_obj.formula_variables, element);
     if (conditional_1 && conditional_2) {
       var_obj.formula_variables.push(element);
       var_obj.num_variables += 1;
@@ -67,6 +67,7 @@ function changeTableLayout (num_var, var_arr, num_results, results_obj) {
 
   // Add the Variables Cell
   let separator = `<div class="separator"></div>`;
+
   var_arr.splice(Math.floor(var_arr.length / 2), 0, separator),
   var_arr = var_arr.join("");
   
@@ -110,12 +111,13 @@ function changeTableLayout (num_var, var_arr, num_results, results_obj) {
 }
 
 function getBinFormulaValues (num_variables, num_results) {
-  let binValues = [];
-  let dec_num = 0;
+  let binValues = [],
+      dec_num = 0;
   for (let i = 0; i < num_results; i += 1) {
     dec_num = i;
-    let str_num = (dec_num).toString(2);
-    let arr_num = str_num.split("");
+
+    let str_num = (dec_num).toString(2),
+        arr_num = str_num.split("");
 
     while (arr_num.length !== num_variables) { arr_num = ["0", ...arr_num]; }
 
@@ -125,12 +127,12 @@ function getBinFormulaValues (num_variables, num_results) {
 }
 
 function checkForGates (index_gate, logical_operation) {
-  let info_obj = {
-    thereIsGates: false,
-    numGates: 0,
-    index_gates: []
-  };
-  let gate_operation = [...logical_operation];
+  let gate_operation = [...logical_operation],
+      info_obj = {
+        thereIsGates: false,
+        numGates: 0,
+        index_gates: []
+      };
 
   gate_operation.forEach(element => { if (element === operators[index_gate]) { 
     info_obj.thereIsGates = true;
@@ -158,9 +160,9 @@ function calcGate (logical_operation, logical_gate_function, logical_operator_in
     }
 
     // Get Every single individual operation in the formula
-    for (let i = 0; i < gate_info.numGates; i += 1) {
+    gate_info.index_gates.forEach(element => {
       current_operation = [...result_operation];
-      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del);
+      current_operation = current_operation.splice(element - correction_index, num_to_del);
 
       // Do the operation
       let result = 0;
@@ -176,9 +178,9 @@ function calcGate (logical_operation, logical_gate_function, logical_operator_in
         result = logical_gate_function(val_1, val_2);
       }
 
-      result_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del, result),
+      result_operation.splice(element - correction_index, num_to_del, result),
       correction_index += increment_correction_index;
-    }
+    })
   }
   return result_operation;
 }

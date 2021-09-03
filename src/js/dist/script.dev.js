@@ -55,8 +55,8 @@ function getVariables(arr_formula) {
     }
   };
   arr_formula.forEach(function (element) {
-    var conditional_1 = typeof element === "string" && isNaN(parseInt(element));
-    var conditional_2 = !get.inArr(operators, element) && !get.inArr(var_obj.formula_variables, element);
+    var conditional_1 = typeof element === "string" && isNaN(parseInt(element)),
+        conditional_2 = !get.inArr(operators, element) && !get.inArr(var_obj.formula_variables, element);
 
     if (conditional_1 && conditional_2) {
       var_obj.formula_variables.push(element);
@@ -120,13 +120,13 @@ function changeTableLayout(num_var, var_arr, num_results, results_obj) {
 }
 
 function getBinFormulaValues(num_variables, num_results) {
-  var binValues = [];
-  var dec_num = 0;
+  var binValues = [],
+      dec_num = 0;
 
   for (var i = 0; i < num_results; i += 1) {
     dec_num = i;
-    var str_num = dec_num.toString(2);
-    var arr_num = str_num.split("");
+    var str_num = dec_num.toString(2),
+        arr_num = str_num.split("");
 
     while (arr_num.length !== num_variables) {
       arr_num = ["0"].concat(_toConsumableArray(arr_num));
@@ -139,13 +139,12 @@ function getBinFormulaValues(num_variables, num_results) {
 }
 
 function checkForGates(index_gate, logical_operation) {
-  var info_obj = {
+  var gate_operation = _toConsumableArray(logical_operation),
+      info_obj = {
     thereIsGates: false,
     numGates: 0,
     index_gates: []
   };
-
-  var gate_operation = _toConsumableArray(logical_operation);
 
   gate_operation.forEach(function (element) {
     if (element === operators[index_gate]) {
@@ -174,9 +173,9 @@ function calcGate(logical_operation, logical_gate_function, logical_operator_ind
     } // Get Every single individual operation in the formula
 
 
-    for (var i = 0; i < gate_info.numGates; i += 1) {
+    gate_info.index_gates.forEach(function (element) {
       current_operation = _toConsumableArray(result_operation);
-      current_operation = current_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del); // Do the operation
+      current_operation = current_operation.splice(element - correction_index, num_to_del); // Do the operation
 
       var result = 0;
 
@@ -190,8 +189,8 @@ function calcGate(logical_operation, logical_gate_function, logical_operator_ind
         result = logical_gate_function(_val_, val_2);
       }
 
-      result_operation.splice(gate_info.index_gates[i] - correction_index, num_to_del, result), correction_index += increment_correction_index;
-    }
+      result_operation.splice(element - correction_index, num_to_del, result), correction_index += increment_correction_index;
+    });
   }
 
   return result_operation;
